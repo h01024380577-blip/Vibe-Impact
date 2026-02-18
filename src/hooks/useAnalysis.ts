@@ -89,6 +89,10 @@ export function useAnalysis() {
     setState(prev => ({ ...prev, step: 3 }));
   }, []);
 
+  const goToStep = useCallback((step: 1 | 2 | 3 | 4) => {
+    setState(prev => ({ ...prev, step }));
+  }, []);
+
   return {
     state,
     scenarioId,
@@ -100,5 +104,6 @@ export function useAnalysis() {
     setShowDiff,
     setPrompt,
     goToStep3,
+    goToStep,
   };
 }
