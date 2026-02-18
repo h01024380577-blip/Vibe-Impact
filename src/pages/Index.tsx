@@ -185,6 +185,8 @@ const Index = () => {
             <PromptComparison
               originalPrompt={state.prompt}
               scenarioId={scenarioId}
+              excludedFiles={state.excludedFiles}
+              impacts={state.impacts}
               onShowDiff={() => setShowDiff(true)}
             />
 
