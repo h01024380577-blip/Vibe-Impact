@@ -84,16 +84,16 @@ export default function DependencyGraph({ targetFile, impacts }: DependencyGraph
     return () => clearTimeout(timer);
   }, []);
 
-  const getLevel = (fileName: string): string => {
+  const getLevel = useCallback((fileName: string): string => {
     if (fileName === targetFile) return 'target';
     const impact = impacts.find(i => i.file === fileName);
     return impact?.level || 'none';
-  };
+  }, [targetFile, impacts]);
 
-  const getTooltip = (fileName: string): string => {
+  const getTooltip = useCallback((fileName: string): string => {
     const impact = impacts.find(i => i.file === fileName);
     return impact?.reason || '';
-  };
+  }, [impacts]);
 
   const positions: Record<string, { x: number; y: number }> = {
     'payment.js': { x: 300, y: 0 },
@@ -103,18 +103,6 @@ export default function DependencyGraph({ targetFile, impacts }: DependencyGraph
     'logger.js': { x: 300, y: 330 },
     'auth.js': { x: 600, y: 330 },
   };
-
-  const initialNodes: Node[] = sampleFiles.map(f => ({
-    id: f.name,
-    type: 'fileNode',
-    position: positions[f.name] || { x: 0, y: 0 },
-    data: {
-      label: f.name,
-      level: getLevel(f.name),
-      functions: f.functions,
-      tooltip: getTooltip(f.name),
-    },
-  }));
 
   const edgeDefs = [
     { s: 'payment.js', t: 'order.js', label: 'updateOrderStatus' },
@@ -127,16 +115,28 @@ export default function DependencyGraph({ targetFile, impacts }: DependencyGraph
     { s: 'notification.js', t: 'logger.js', label: 'logTransaction' },
   ];
 
-  const getEdgeColor = (source: string, target: string) => {
+  const getEdgeColor = useCallback((source: string, target: string) => {
     const sLevel = getLevel(source);
     const tLevel = getLevel(target);
     if (sLevel === 'target' || tLevel === 'target') return 'hsl(217 91% 60%)';
     if (sLevel === 'direct' || tLevel === 'direct') return 'hsl(0 84% 60%)';
     if (sLevel === 'indirect' || tLevel === 'indirect') return 'hsl(38 92% 50%)';
     return 'hsl(240 12% 35%)';
-  };
+  }, [getLevel]);
 
-  const initialEdges: Edge[] = edgeDefs.map((e, i) => ({
+  const currentNodes: Node[] = sampleFiles.map(f => ({
+    id: f.name,
+    type: 'fileNode',
+    position: positions[f.name] || { x: 0, y: 0 },
+    data: {
+      label: f.name,
+      level: getLevel(f.name),
+      functions: f.functions,
+      tooltip: getTooltip(f.name),
+    },
+  }));
+
+  const currentEdges: Edge[] = edgeDefs.map((e, i) => ({
     id: `e-${i}`,
     source: e.s,
     target: e.t,
@@ -149,8 +149,13 @@ export default function DependencyGraph({ targetFile, impacts }: DependencyGraph
     markerEnd: { type: MarkerType.ArrowClosed, width: 12, height: 12, color: getEdgeColor(e.s, e.t) },
   }));
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(currentNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(currentEdges);
+
+  useEffect(() => {
+    setNodes(currentNodes);
+    setEdges(currentEdges);
+  }, [targetFile, impacts]);
 
   if (!visible) return null;
 
