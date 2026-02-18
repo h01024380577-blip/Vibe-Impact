@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import StepProgress from '@/components/StepProgress';
+import StepNav from '@/components/StepNav';
 import CodeEditor from '@/components/CodeEditor';
 import RequestInput from '@/components/RequestInput';
 import AnalysisAnimation from '@/components/AnalysisAnimation';
@@ -10,7 +11,7 @@ import PromptComparison from '@/components/PromptComparison';
 import CodeDiffViewer from '@/components/CodeDiffViewer';
 import { useAnalysis } from '@/hooks/useAnalysis';
 import { sampleFiles } from '@/data/sampleProject';
-import { Zap, Shield, GitBranch, ArrowLeft } from 'lucide-react';
+import { Zap, Shield, GitBranch } from 'lucide-react';
 
 const Index = () => {
   const {
@@ -24,7 +25,10 @@ const Index = () => {
     setShowDiff,
     setPrompt,
     goToStep3,
+    goToStep,
   } = useAnalysis();
+
+  const hasResults = state.impacts.length > 0;
 
   const [activeFile, setActiveFile] = useState('payment.js');
 
@@ -103,6 +107,7 @@ const Index = () => {
                 </div>
               </div>
             </div>
+            <StepNav currentStep={state.step} onGoToStep={goToStep} hasResults={hasResults} />
           </div>
         )}
 
@@ -119,12 +124,7 @@ const Index = () => {
                     targetFunction={state.targetFunction}
                     impacts={state.impacts}
                   />
-                  <button
-                    onClick={goToStep3}
-                    className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg transition-all glow-primary"
-                  >
-                    다음 단계로 →
-                  </button>
+                  <StepNav currentStep={state.step} onGoToStep={goToStep} hasResults={hasResults} />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
@@ -164,22 +164,15 @@ const Index = () => {
               onProceed={proceed}
               onCancel={cancel}
             />
+            <StepNav currentStep={state.step} onGoToStep={goToStep} hasResults={hasResults} />
           </div>
         )}
 
         {/* Step 4 - Comparison */}
         {state.step === 4 && (
           <div className="space-y-6 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={cancel}
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                처음으로
-              </button>
+            <div className="text-center">
               <h2 className="text-lg font-bold text-foreground">프롬프트 강화 결과 비교</h2>
-              <div />
             </div>
 
             <PromptComparison
@@ -199,6 +192,8 @@ const Index = () => {
                 <CodeDiffViewer scenarioId={scenarioId} />
               </div>
             )}
+
+            <StepNav currentStep={state.step} onGoToStep={goToStep} hasResults={hasResults} />
           </div>
         )}
       </main>
