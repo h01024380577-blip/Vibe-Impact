@@ -7,6 +7,7 @@ import AnalysisAnimation from '@/components/AnalysisAnimation';
 import AnalysisReport from '@/components/AnalysisReport';
 import DependencyGraph from '@/components/DependencyGraph';
 import DecisionPanel from '@/components/DecisionPanel';
+import TargetSelector from '@/components/TargetSelector';
 import PromptComparison from '@/components/PromptComparison';
 import CodeDiffViewer from '@/components/CodeDiffViewer';
 import { useAnalysis } from '@/hooks/useAnalysis';
@@ -26,6 +27,7 @@ const Index = () => {
     setPrompt,
     goToStep3,
     goToStep,
+    changeTarget,
   } = useAnalysis();
 
   const hasResults = state.impacts.length > 0;
@@ -117,24 +119,31 @@ const Index = () => {
             {state.analysisPhase !== 'done' ? (
               <AnalysisAnimation phase={state.analysisPhase} />
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-                <div className="space-y-4">
-                  <AnalysisReport
-                    targetFile={state.targetFile}
-                    targetFunction={state.targetFunction}
-                    impacts={state.impacts}
-                  />
-                  <StepNav currentStep={state.step} onGoToStep={goToStep} hasResults={hasResults} />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                    <GitBranch className="w-4 h-4 text-primary" />
-                    의존성 그래프
-                  </h3>
-                  <DependencyGraph
-                    targetFile={state.targetFile}
-                    impacts={state.impacts}
-                  />
+              <div className="space-y-6 animate-fade-in">
+                <TargetSelector
+                  targetFile={state.targetFile}
+                  targetFunction={state.targetFunction}
+                  onChangeTarget={changeTarget}
+                />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <AnalysisReport
+                      targetFile={state.targetFile}
+                      targetFunction={state.targetFunction}
+                      impacts={state.impacts}
+                    />
+                    <StepNav currentStep={state.step} onGoToStep={goToStep} hasResults={hasResults} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                      <GitBranch className="w-4 h-4 text-primary" />
+                      의존성 그래프
+                    </h3>
+                    <DependencyGraph
+                      targetFile={state.targetFile}
+                      impacts={state.impacts}
+                    />
+                  </div>
                 </div>
               </div>
             )}

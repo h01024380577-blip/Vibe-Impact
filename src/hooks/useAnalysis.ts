@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { AnalysisState } from '@/types/analysis';
 import { scenarioImpacts } from '@/data/analysisResults';
 import { scenarios } from '@/data/sampleProject';
+import { computeImpacts } from '@/utils/computeImpacts';
 
 const initialState: AnalysisState = {
   step: 1,
@@ -93,6 +94,16 @@ export function useAnalysis() {
     setState(prev => ({ ...prev, step }));
   }, []);
 
+  const changeTarget = useCallback((file: string, fn: string) => {
+    const newImpacts = computeImpacts(file, fn);
+    setState(prev => ({
+      ...prev,
+      targetFile: file,
+      targetFunction: fn,
+      impacts: newImpacts,
+    }));
+  }, []);
+
   return {
     state,
     scenarioId,
@@ -105,5 +116,6 @@ export function useAnalysis() {
     setPrompt,
     goToStep3,
     goToStep,
+    changeTarget,
   };
 }
